@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>for my nathania <3</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Just+Me+Again+Down+Here&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Just Me Again Down Here', cursive;
+            background-color: #fff0f3;
+            color: #4a232c;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            transform: rotate(-2deg);
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #ff4d6d;
+        }
+
+        .subtitle {
+            font-size: 1.6rem;
+            opacity: 0.8;
+            margin-top: -5px;
+        }
+
+        .app-holder {
+            width: 100%;
+            max-width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .sketch-box {
+            position: relative;
+            width: 100%;
+            min-height: 120px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .sketch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .box-text {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            width: 90%;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .secret-btn {
+            font-family: 'Just Me Again Down Here', cursive;
+            background: transparent;
+            border: none;
+            font-size: 2rem;
+            color: #ff4d6d;
+            cursor: pointer;
+            margin-top: 10px;
+            padding: 10px;
+            position: relative;
+        }
+
+        .footer-note {
+            font-size: 1.2rem;
+            margin-top: 30px;
+            opacity: 0.6;
+            text-align: center;
+            transform: rotate(1deg);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>hi nathania !!</h1>
+        <p class="subtitle">I (Kismat) made dis web for u.. crush standard check hehe</p>
+    </header>
+
+    <div class="app-holder">
+
+        <div class="sketch-box" onclick="revealNote(this, 'istg screen distance sucks sm i wish i could teleport to filipino rn just to hold ur hand fr :(')">
+            <canvas class="sketch-canvas"></canvas>
+            <div class="box-text">click dis first box pls</div>
+        </div>
+
+        <div class="sketch-box" onclick="revealNote(this, 'ur literally so pretty when u wake up n reply to my texts. my absolute fav part of the day istg')">
+            <canvas class="sketch-canvas"></canvas>
+            <div class="box-text">box numbr two</div>
+        </div>
+
+        <div class="sketch-box" onclick="revealNote(this, 'mahal kita so much nathania. dynamic duo forever idc what anyone says u stuck w me now')">
+            <canvas class="sketch-canvas"></canvas>
+            <div class="box-text">secret note 3 inside here...</div>
+        </div>
+
+        <div class="sketch-box" style="min-height: 160px;" id="finalBox">
+            <canvas class="sketch-canvas" id="canvasReward"></canvas>
+            <div class="box-text" id="rewardText" style="font-size: 2.2rem; color: #ff4d6d;">
+                tap box 1, 2 and 3 to open your main prize !!
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-note">
+        sry for bad web creating, i made dis fast coz i miss u ok bye
+    </div>
+
+    <script>
+        let openedBoxes = new Set();
+
+        function drawRoughBox(canvas, isOpened = false, customColor = '#ffb3c6') {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+            ctx.scale(2, 2);
+
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = isOpened ? '#ff4d6d' : customColor;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            function drawImperfectRect() {
+                ctx.beginPath();
+                ctx.moveTo(10 + Math.random()*4, 10 + Math.random()*3);
+                ctx.lineTo(rect.width - 10 - Math.random()*4, 8 + Math.random()*4);
+                ctx.lineTo(rect.width - 12 + Math.random()*3, rect.height - 10 - Math.random()*4);
+                ctx.lineTo(12 + Math.random()*4, rect.height - 12 + Math.random()*3);
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+            drawImperfectRect();
+            drawImperfectRect();
+
+            if (!isOpened) {
+                ctx.strokeStyle = '#ff4d6d';
+                ctx.beginPath();
+                ctx.moveTo(rect.width - 25, 20);
+                ctx.bezierCurveTo(rect.width - 30, 15, rect.width - 35, 20, rect.width - 25, 30);
+                ctx.bezierCurveTo(rect.width - 15, 20, rect.width - 20, 15, rect.width - 25, 20);
+                ctx.stroke();
+            }
+        }
+
+        const boxes = document.querySelectorAll('.sketch-box');
+        boxes.forEach((box, index) => {
+            if(index < 3) {
+                const canvas = box.querySelector('.sketch-canvas');
+                setTimeout(() => drawRoughBox(canvas, false, '#ffb3c6'), 50);
+            }
+        });
+
+        const rewardCanvas = document.getElementById('canvasReward');
+        setTimeout(() => drawRoughBox(rewardCanvas, false, '#c1121f'), 60);
+
+        function revealNote(element, text) {
+            const canvas = element.querySelector('.sketch-canvas');
+            const textDiv = element.querySelector('.box-text');
+            
+            openedBoxes.add(element);
+            drawRoughBox(canvas, true);
+            
+            textDiv.style.fontSize = "1.6rem";
+            textDiv.style.color = "#000000";
+            textDiv.innerHTML = text;
+
+            element.style.transform = "rotate(" + (Math.random() * 4 - 2) + "deg) scale(0.98)";
+            setTimeout(() => { element.style.transform = "none"; }, 150);
+
+            if (openedBoxes.size >= 3) {
+                unlockPrize();
+            }
+        }
+
+        function unlockPrize() {
+            const rewardText = document.getElementById('rewardText');
+            const rewardCanvas = document.getElementById('canvasReward');
+            
+            drawRoughBox(rewardCanvas, true);
+            
+            rewardText.innerHTML = `
+                <div style="transform: rotate(-1deg);">
+                    omg u found everything !!<br>
+                    <span style="font-size: 2.5rem; background: #ffccd5; padding: 2px 6px;">🎟️ 1x E-Hug Ticket</span><br>
+                    valid until we meet offline fr. screenshot dis n send it to me (Kismat) right now to claim !! mwah
+                </div>
+            `;
+            
+            const ctx = rewardCanvas.getContext('2d');
+            ctx.fillStyle = '#ff4d6d';
+            for(let i=0; i<15; i++) {
+                ctx.fillRect(Math.random() * rewardCanvas.width/2, Math.random() * rewardCanvas.height/2, 4, 4);
+            }
+        }
+    </script>
+</body>
+</html>
+
