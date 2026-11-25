@@ -1,239 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>for my nathania <3</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Just+Me+Again+Down+Here&display=swap');
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: 'Just Me Again Down Here', cursive;
-            background-color: #fff0f3;
-            color: #4a232c;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 15px;
-            font-size: 1.8rem;
-            letter-spacing: 1px;
-            line-height: 1.2;
-        }
-
-        header {
-            text-align: center;
-            margin-top: 10px;
-            margin-bottom: 15px;
-            width: 100%;
-            transform: rotate(-2deg);
-        }
-
-        h1 {
-            font-size: 3rem;
-            color: #ff4d6d;
-        }
-
-        .subtitle {
-            font-size: 1.6rem;
-            opacity: 0.8;
-            margin-top: -5px;
-        }
-
-        .app-holder {
-            width: 100%;
-            max-width: 350px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .sketch-box {
-            position: relative;
-            width: 100%;
-            min-height: 120px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-        }
-
-        .sketch-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .box-text {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-            width: 90%;
-            pointer-events: none;
-            user-select: none;
-        }
-
-        .secret-btn {
-            font-family: 'Just Me Again Down Here', cursive;
-            background: transparent;
-            border: none;
-            font-size: 2rem;
-            color: #ff4d6d;
-            cursor: pointer;
-            margin-top: 10px;
-            padding: 10px;
-            position: relative;
-        }
-
-        .footer-note {
-            font-size: 1.2rem;
-            margin-top: 30px;
-            opacity: 0.6;
-            text-align: center;
-            transform: rotate(1deg);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>FootKick 3D — Camera Soccer</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#07131c;color:#fff;overflow:hidden}
+#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;inset:0;pointer-events:none;padding:14px;display:flex;flex-direction:column;justify-content:space-between}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.panel{background:#07131cce;border:1px solid #ffffff24;border-radius:14px;padding:10px 13px;backdrop-filter:blur(8px)}
+.score{font-size:25px;font-weight:900;letter-spacing:1px}.small{font-size:11px;color:#b8cbd5}
+#status{font-size:12px;color:#ffd36a;margin-top:4px}
+#camBox{position:fixed;right:14px;bottom:14px;width:min(34vw,180px);aspect-ratio:4/3;border:2px solid #ffffff66;border-radius:13px;overflow:hidden;background:#15232b;z-index:3}
+#video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#camLabel{position:absolute;left:6px;top:6px;background:#000a;padding:4px 7px;border-radius:7px;font-size:10px}
+#startScreen{position:fixed;inset:0;z-index:5;background:linear-gradient(145deg,#07131cf2,#0b2b30ee);display:grid;place-items:center;padding:22px}
+.card{width:min(520px,100%);background:#10232c;border:1px solid #ffffff25;border-radius:22px;padding:24px;box-shadow:0 20px 80px #0008}
+h1{font-size:clamp(28px,7vw,44px);line-height:1;margin:0 0 10px}p{color:#c5d5dc;line-height:1.5}
+button{border:0;border-radius:12px;padding:13px 18px;background:#a8ff4d;color:#12200b;font-weight:900;font-size:15px;width:100%;cursor:pointer}
+#help{font-size:12px;color:#9eb2bd;margin-top:14px}
+#bottomHint{align-self:flex-start;max-width:calc(100% - 190px);font-size:12px}
+#toast{position:fixed;top:25%;left:50%;transform:translateX(-50%);font-size:clamp(20px,5vw,32px);font-weight:1000;text-shadow:0 3px 15px #000;pointer-events:none}
+@media(max-width:600px){#hud{padding:9px}.panel{padding:8px 10px}.score{font-size:21px}#camBox{width:34vw;right:9px;bottom:9px}#bottomHint{max-width:60%;font-size:10px}}
+</style>
 </head>
 <body>
+<div id="game"></div>
+<div id="hud">
+  <div class="top">
+    <div class="panel"><div class="small">FOOTKICK 3D</div><div class="score">⚽ <span id="score">0</span> - <span id="miss">0</span></div><div class="small">GOALS · MISSES</div></div>
+    <div class="panel" style="text-align:right"><div class="small">TIME</div><div class="score" id="timer">60</div><div id="status">Camera not started</div></div>
+  </div>
+  <div class="panel" id="bottomHint">Stand back so your legs and feet fit in the camera. Step side-to-side to move. Lift a foot to shoot.</div>
+</div>
+<div id="camBox"><video id="video" autoplay playsinline muted></video><div id="camLabel">LIVE FOOT TRACKING</div></div>
+<div id="toast"></div>
+<div id="startScreen">
+  <div class="card">
+    <div class="small">CAMERA-POWERED SOCCER</div>
+    <h1>FOOTKICK<br><span style="color:#a8ff4d">3D</span></h1>
+    <p>Use your real feet to control the player. Move your feet left or right to line up, then lift one foot to shoot at the goal.</p>
+    <button id="start">START CAMERA & GAME</button>
+    <div id="help">Needs camera permission and an internet connection to load the AI tracking and 3D libraries. Use a space where you can move safely. Keep your phone steady and in a position where your feet are visible.</div>
+  </div>
+</div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import {PoseLandmarker, FilesetResolver} from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
 
-    <header>
-        <h1>hi nathania !!</h1>
-        <p class="subtitle">I (Kismat) made dis web for u.. crush standard check hehe</p>
-    </header>
+const mount=document.querySelector('#game'), video=document.querySelector('#video');
+const statusEl=document.querySelector('#status'), scoreEl=document.querySelector('#score'), missEl=document.querySelector('#miss'), timerEl=document.querySelector('#timer'), toast=document.querySelector('#toast');
+let scene,camera,renderer,player,ball,ballVelocity=new THREE.Vector3(),poseLandmarker,stream;
+let score=0,miss=0,timeLeft=60,playing=false,lastFrame=0,lastShot=0,footY=[0,0],footZ=[0,0],lastKick=[0,0],playerX=0,ballMoving=false,goalFlash=0;
+const clock=new THREE.Clock();
 
-    <div class="app-holder">
-
-        <div class="sketch-box" onclick="revealNote(this, 'istg screen distance sucks sm i wish i could teleport to filipino rn just to hold ur hand fr :(')">
-            <canvas class="sketch-canvas"></canvas>
-            <div class="box-text">click dis first box pls</div>
-        </div>
-
-        <div class="sketch-box" onclick="revealNote(this, 'ur literally so pretty when u wake up n reply to my texts. my absolute fav part of the day istg')">
-            <canvas class="sketch-canvas"></canvas>
-            <div class="box-text">box numbr two</div>
-        </div>
-
-        <div class="sketch-box" onclick="revealNote(this, 'mahal kita so much nathania. dynamic duo forever idc what anyone says u stuck w me now')">
-            <canvas class="sketch-canvas"></canvas>
-            <div class="box-text">secret note 3 inside here...</div>
-        </div>
-
-        <div class="sketch-box" style="min-height: 160px;" id="finalBox">
-            <canvas class="sketch-canvas" id="canvasReward"></canvas>
-            <div class="box-text" id="rewardText" style="font-size: 2.2rem; color: #ff4d6d;">
-                tap box 1, 2 and 3 to open your main prize !!
-            </div>
-        </div>
-
-    </div>
-
-    <div class="footer-note">
-        sry for bad web creating, i made dis fast coz i miss u ok bye
-    </div>
-
-    <script>
-        let openedBoxes = new Set();
-
-        function drawRoughBox(canvas, isOpened = false, customColor = '#ffb3c6') {
-            const ctx = canvas.getContext('2d');
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * 2;
-            canvas.height = rect.height * 2;
-            ctx.scale(2, 2);
-
-            ctx.clearRect(0, 0, rect.width, rect.height);
-            
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = isOpened ? '#ff4d6d' : customColor;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-
-            function drawImperfectRect() {
-                ctx.beginPath();
-                ctx.moveTo(10 + Math.random()*4, 10 + Math.random()*3);
-                ctx.lineTo(rect.width - 10 - Math.random()*4, 8 + Math.random()*4);
-                ctx.lineTo(rect.width - 12 + Math.random()*3, rect.height - 10 - Math.random()*4);
-                ctx.lineTo(12 + Math.random()*4, rect.height - 12 + Math.random()*3);
-                ctx.closePath();
-                ctx.stroke();
-            }
-
-            drawImperfectRect();
-            drawImperfectRect();
-
-            if (!isOpened) {
-                ctx.strokeStyle = '#ff4d6d';
-                ctx.beginPath();
-                ctx.moveTo(rect.width - 25, 20);
-                ctx.bezierCurveTo(rect.width - 30, 15, rect.width - 35, 20, rect.width - 25, 30);
-                ctx.bezierCurveTo(rect.width - 15, 20, rect.width - 20, 15, rect.width - 25, 20);
-                ctx.stroke();
-            }
-        }
-
-        const boxes = document.querySelectorAll('.sketch-box');
-        boxes.forEach((box, index) => {
-            if(index < 3) {
-                const canvas = box.querySelector('.sketch-canvas');
-                setTimeout(() => drawRoughBox(canvas, false, '#ffb3c6'), 50);
-            }
-        });
-
-        const rewardCanvas = document.getElementById('canvasReward');
-        setTimeout(() => drawRoughBox(rewardCanvas, false, '#c1121f'), 60);
-
-        function revealNote(element, text) {
-            const canvas = element.querySelector('.sketch-canvas');
-            const textDiv = element.querySelector('.box-text');
-            
-            openedBoxes.add(element);
-            drawRoughBox(canvas, true);
-            
-            textDiv.style.fontSize = "1.6rem";
-            textDiv.style.color = "#000000";
-            textDiv.innerHTML = text;
-
-            element.style.transform = "rotate(" + (Math.random() * 4 - 2) + "deg) scale(0.98)";
-            setTimeout(() => { element.style.transform = "none"; }, 150);
-
-            if (openedBoxes.size >= 3) {
-                unlockPrize();
-            }
-        }
-
-        function unlockPrize() {
-            const rewardText = document.getElementById('rewardText');
-            const rewardCanvas = document.getElementById('canvasReward');
-            
-            drawRoughBox(rewardCanvas, true);
-            
-            rewardText.innerHTML = `
-                <div style="transform: rotate(-1deg);">
-                    omg u found everything !!<br>
-                    <span style="font-size: 2.5rem; background: #ffccd5; padding: 2px 6px;">🎟️ 1x E-Hug Ticket</span><br>
-                    valid until we meet offline fr. screenshot dis n send it to me (Kismat) right now to claim !! mwah
-                </div>
-            `;
-            
-            const ctx = rewardCanvas.getContext('2d');
-            ctx.fillStyle = '#ff4d6d';
-            for(let i=0; i<15; i++) {
-                ctx.fillRect(Math.random() * rewardCanvas.width/2, Math.random() * rewardCanvas.height/2, 4, 4);
-            }
-        }
-    </script>
-</body>
-</html>
-
+function makeField(){
+ scene=new THREE.Scene();scene.background=new THREE.Color(0x8bd2e9);scene.fog=new THREE.Fog(0x8bd2e9,25,65);
+ camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.1,100);camera.position.set(0,8,17);camera.lookAt(0,1,-2);
+ renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;mount.appendChild(renderer.domElement);
+ scene.add(new THREE.HemisphereLight(0xffffff,0x365b3a,2));
+ const sun=new THREE.DirectionalLight(0xffffff,2.3);sun.position.set(-5,12,8);sun.castShadow=true;scene.add(sun);
+ const grass=new THREE.Mesh(new THREE.PlaneGeometry(34,48),new THREE.MeshStandardMaterial({color:0x248c48,roughness:1}));grass.rotation.x=-Math.PI/2;grass.position.z=-7;grass.receiveShadow=true;scene.add(grass);
+ for(let i=0;i<8;i++){let stripe=new THREE.Mesh(new THREE.PlaneGeometry(34,3),new THREE.MeshStandardMaterial({color:i%2?0x248c48:0x2c9a50}));stripe.rotation.x=-Math.PI/2;stripe.position.set(0,.012,-25+i*6);scene.add(stripe)}
+ const lineMat=new THREE.MeshBasicMaterial({color:0xffffff});
+ function line(x,z,w,h){let m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),lineMat);m.rotation.x=-Math.PI/2;m.position.set(x,.025,z);scene.add(m)}
+ line(0,16,34,.12);line(0,-30,34,.12);line(-17,-7,.12,46);line(17,-7,.12,46);line(0,-19,34,.12);line(0,5,34,.12);
+ const circle=new THREE.Mesh(new THREE.RingGeometry(4.95,5.08,64),lineMat);circle.rotation.x=-Math.PI/2;circle.position.set(0,.03,5);scene.add(circle);
+ // Goal frame at far end
+ const postMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.35});
+ const postGeo=new THREE.CylinderGeometry(.12,.12,3.4,12);
+ for(const x of [-5,5]){let p=new THREE.Mesh(postGeo,postMat);p.position.set(x,1.7,-25);p.castShadow=true;scene.add(p)}
+ let bar=new THREE.Mesh(new THREE.BoxGeometry(10.2,.22,.22),postMat);bar.position.set(0,3.35,-25);scene.add(bar);
+ let net=new THREE.Mesh(new THREE.PlaneGeometry(10,3.3),new THREE.MeshBasicMaterial({color:0xffffff,wireframe:true,transparent:true,opacity:.22,side:THREE.DoubleSide}));net.position.set(0,1.65,-25.1);scene.add(net);
+ // Player cartoon model
+ player=new THREE.Group();scene.add(player);player.position.set(0,0,7);
+ const shirt=new THREE.Mesh(new THREE.CapsuleGeometry(.48,.85,5,12),new THREE.MeshStandardMaterial({color:0x172bdb}));shirt.position.y=1.55;shirt.castShadow=true;player.add(shirt);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.32,18,14),new THREE.MeshStandardMaterial({color:0xb8794d}));head.position.y=2.55;player.add(head);
+ const shorts=new THREE.Mesh(new THREE.BoxGeometry(.85,.32,.48),new THREE.MeshStandardMaterial({color:0x101820}));shorts.position.y=.95;player.add(shorts);
+ for(let x of [-.23,.23]){let leg=new THREE.Mesh(new THREE.CylinderGeometry(.13,.11,.82,10),new THREE.MeshStandardMaterial({color:0xb8794d}));leg.position.set(x,.48,0);leg.name=x<0?'leftLeg':'rightLeg';player.add(leg);let shoe=new THREE.Mesh(new THREE.BoxGeometry(.28,.16,.48),new THREE.MeshStandardMaterial({color:0xffffff}));shoe.position.set(x,.12,-.13);player.add(shoe)}
+ // Ball
+ ball=new THREE.Mesh(new THREE.SphereGeometry(.38,24,18),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.45}));ball.position.set(0,.4,4.4);ball.castShadow=true;scene.add(ball);
+ const ballLines=new THREE.Mesh(new THREE.IcosahedronGeometry(.385,1),new THREE.MeshBasicMaterial({color:0x111111,wireframe:true,transparent:true,opacity:.45}));ball.add(ballLines);
+}
+function say(msg){toast.textContent=msg;clearTimeout(say.t);say.t=setTimeout(()=>toast.textContent='',850)}
+function resetBall(){ball.position.set(playerX,.4,4.4);ballVelocity.set(0,0,0);ballMoving=false}
+function shoot(side){
+ if(!playing||performance.now()-lastShot<650)return;
+ lastShot=performance.now();ballMoving=true;
+ const aim=Math.max(-4.5,Math.min(4.5,playerX*.45+(side===0?-.6:.6)));
+ ballVelocity.set(aim*.55,1.8,-17);
+ say('SHOT!');
+}
+function updateBall(dt){
+ if(!ballMoving)return;
+ ballVelocity.y-=8.5*dt;ball.position.addScaledVector(ballVelocity,dt);
+ ball.rotation.x+=dt*5;ball.rotation.z+=dt*4;
+ if(ball.position.y<.38){ball.position.y=.38;ballVelocity.y=Math.abs(ballVelocity.y)*.55}
+ if(ball.position.z<-24.6){
+   if(Math.abs(ball.position.x)<4.85&&ball.position.y<3.2){score++;scoreEl.textContent=score;say('GOAL! ⚽')}
+   else{miss++;missEl.textContent=miss;say('WIDE!')}
+   resetBall();
+ }
+ if(ball.position.z>13)resetBall();
+}
+function animate(now){
+ requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);
+ if(playing){updateBall(dt);player.position.x+=(playerX-player.position.x)*Math.min(1,dt*7);if(goalFlash>0)goalFlash-=dt}
+ renderer.render(scene,camera);
+}
+async function start(){
+ const btn=document.querySelector('#start');btn.disabled=true;btn.textContent='STARTING...';
+ try{
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
+  video.srcObject=stream;await video.play();
+  statusEl.textContent='Loading AI tracker...';
+  const vision=await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+  poseLandmarker=await PoseLandmarker.createFromOptions(vision,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',delegate:'GPU'},runningMode:'VIDEO',numPoses:1});
+  document.querySelector('#startScreen').style.display='none';playing=true;timeLeft=60;statusEl.textContent='AI tracking active';say('LET’S PLAY!');
+  setInterval(()=>{if(playing){timeLeft--;timerEl.textContent=timeLeft;if(timeLeft<=0){playing=false;say('FULL TIME!');statusEl.textContent='Finished — restart to play';}}},1000);
+  requestAnimationFrame(track);
+ }catch(e){console.error(e);statusEl.textContent='Camera or tracker error';btn.disabled=false;btn.textContent='TRY AGAIN';document.querySelector('#help').textContent='Could not start. Allow camera permission, use HTTPS or localhost, and check your internet connection. Details: '+e.message}
+}
+function track(now){
+ if(!playing)return;
+ if(video.readyState>=2&&poseLandmarker&&now-lastFrame>35){
+  lastFrame=now;
+  const result=poseLandmarker.detectForVideo(video,now);
+  if(result.landmarks?.length){
+   const lm=result.landmarks[0];
+   // ankle / foot-index points: left 27/31, right 28/32
+   const feet=[{ankle:lm[27],toe:lm[31]},{ankle:lm[28],toe:lm[32]}];
+   if(feet.every(f=>f.ankle&&f.toe&&f.ankle.visibility>.35&&f.toe.visibility>.3)){
+    statusEl.textContent='Feet detected ✓';
+    const center=(feet[0].toe.x+feet[1].toe.x)/2;
+    playerX=(.5-center)*15;playerX=Math.max(-5.8,Math.min(5.8,playerX));
+    feet.forEach((f,i)=>{
+      const lift=f.toe.y;
+      if(footY[i]===0)footY[i]=lift;
+      const raised=footY[i]-lift;
+      if(raised>.075&&performance.now()-lastKick[i]>850){lastKick[i]=performance.now();shoot(i)}
+      footY[i]=footY[i]*.72+lift*.28;
+    });
+   }else statusEl.textContent='Show both feet to camera';
+  }else statusEl.textContent='Looking for feet...';
+ }
+ requestAnimationFrame(track);
+}
+makeField();animate(0);
+document.querySelector('#start').addEventListener('click',start);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script>
+</body></html>
